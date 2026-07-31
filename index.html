@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام حضور وانصراف العمال</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .worker-card {
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .worker-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .btn-action {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        /* ألوان الأزرار غير النشطة */
+        .btn-present { background-color: #e6ffe6; color: #198754; border-color: #198754; }
+        .btn-friday-work { background-color: #e7f1ff; color: #0d6efd; border-color: #0d6efd; }
+        .btn-friday-leave { background-color: #f1f1f1; color: #6c757d; border-color: #6c757d; }
+        .btn-absent { background-color: #ffe6e6; color: #dc3545; border-color: #dc3545; }
+        
+        /* ألوان الأزرار النشطة (المحددة) */
+        .active-present { background-color: #198754; color: #fff; }
+        .active-friday-work { background-color: #0d6efd; color: #fff; }
+        .active-friday-leave { background-color: #6c757d; color: #fff; }
+        .active-absent { background-color: #dc3545; color: #fff; }
+
+        .pie-chart-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+        .worker-name-btn {
+            background: none;
+            border: none;
+            font-weight: 700;
+            color: #333;
+            text-align: right;
+            cursor: pointer;
+            padding: 0;
+        }
+        .attendance-count {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .view { display: none; }
+        .active-view { display: block; }
+        .actions-container {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-4">
+    <!-- الهيدر -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h3 class="fw-bold text-primary">نظام إدارة العمال</h3>
+        <div class="d-flex gap-2">
+            <input type="date" id="currentDate" class="form-control" onchange="renderApp()">
+            <button class="btn btn-outline-secondary" onclick="openSettings()">⚙️ الإعدادات</button>
+        </div>
+    </div>
+
+    <!-- شاشة الحضور -->
+    <div id="attendanceView" class="active-view">
+        <div class="card mb-4">
+            <div class="card-body d-flex gap-2">
+                <input type="text" id="workerNameInput" class="form-control" placeholder="أدخل اسم العامل الجديد">
+                <button class="btn btn-primary" onclick="addWorker()">إضافة عامل</button>
+            </div>
+        </div>
+        <div id="workersList" class="row g-3"></div>
+    </div>
+
+    <!-- شاشة تفاصيل المرتب -->
+    <div id="salaryView" class="view">
+        <button class="btn btn-secondary mb-4" onclick="switchView('attendanceView')">← رجوع للقائمة</button>
+        <div id="salaryDetails" class="card p-4 shadow-sm"></div>
+    </div>
+</div>
+
+<!-- نافذة الإعدادات -->
+<div class="modal fade" id="settingsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إعدادات المرتب</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">يومية العمل العادي / إجازة الجمعة (جنيه)</label>
+                    <input type="number" id="baseRateInput" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">يومية نزول يوم الجمعة (بدل - جنيه)</label>
+                    <input type="number" id="replacementRateInput" class="form-control">
+                </div>
+                <small class="text-muted">* المرتب الأساسي وإجازات الجمعة تصرف في نفس الشهر، بينما تصرف بدلات (نزول الجمعة) الخاصة بالشهر السابق في الشهر الحالي.</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="saveSettings()">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // قاعدة البيانات المحلية
+    let db = {
+        workers: [],
+        attendance: {}, 
+        settings: { baseRate: 165, replacementRate: 100 }
+    };
+
+    let currentDateObj = new Date();
+
+    // تحميل وحفظ البيانات
+    function loadDB() {
+        const saved = localStorage.getItem('workers_db_v2'); // تم تغيير المفتاح لضمان تحديث النظام
+        if (saved) db = JSON.parse(saved);
+    }
+    function saveDB() {
+        localStorage.setItem('workers_db_v2', JSON.stringify(db));
+    }
+
+    // إدارة التواريخ
+    function getDateString() {
+        return document.getElementById('currentDate').value;
+    }
+    function getCurrentMonth() {
+        const dateStr = getDateString();
+        return dateStr ? dateStr.substring(0, 7) : new Date().toISOString().substring(0, 7);
+    }
+    function getDaysInMonth(monthStr) {
+        const [year, month] = monthStr.split('-').map(Number);
+        return new Date(year, month, 0).getDate();
+    }
+    function getPreviousMonth(monthStr) {
+        const [year, month] = monthStr.split('-').map(Number);
+        const d = new Date(year, month - 2, 1);
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    // إضافة عامل
+    function addWorker() {
+        const name = document.getElementById('workerNameInput').value.trim();
+        if (!name) return alert('من فضلك أدخل اسم العامل');
+        db.workers.push({ id: Date.now().toString(), name: name });
+        db.workers.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+        document.getElementById('workerNameInput').value = '';
+        saveDB();
+        renderApp();
+    }
+
+    // تسجيل الحضور
+    function markAttendance(workerId, status) {
+        const dateStr = getDateString();
+        if (!dateStr) return alert('اختر التاريخ أولاً');
+
+        if (!db.attendance[dateStr]) db.attendance[dateStr] = {};
+        
+        const current = db.attendance[dateStr][workerId];
+        const dayNumber = parseInt(dateStr.split('-')[2]); // استخراج رقم اليوم تلقائياً من التاريخ
+        
+        if (current && current.status === status) {
+            delete db.attendance[dateStr][workerId]; // إلغاء التحديد إذا ضغط نفس الزرار
+        } else {
+            // إذا كانت الحالة "نزل يوم جمعة"، نحفظ رقم اليوم تلقائياً
+            if (status === 'friday_work') {
+                db.attendance[dateStr][workerId] = { status: status, day: dayNumber };
+            } else {
+                db.attendance[dateStr][workerId] = { status: status };
+            }
+        }
+        saveDB();
+        renderApp();
+    }
+
+    // رسم الدائرة (Pie Chart)
+    function generatePieChart(workerId) {
+        const monthStr = getCurrentMonth();
+        const daysInMonth = getDaysInMonth(monthStr);
+        const [year, month] = monthStr.split('-').map(Number);
+        
+        let slices = '';
+        let countPresent = 0;
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const att = db.attendance[dateStr]?.[workerId];
+            
+            let color = '#e9ecef'; // رمادي فاتح للأن.days غير المسجلة
+            let text = '';
+            
+            if (att) {
+                if (att.status === 'present') { color = '#198754'; countPresent++; } // أخضر
+                if (att.status === 'friday_leave') { color = '#6c757d'; countPresent++; } // رمادي غامق
+                if (att.status === 'friday_work') { color = '#0d6efd'; countPresent++; text = `ج${att.day}`; } // أزرق
+                if (att.status === 'absent') { color = '#dc3545'; } // أحمر
+            }
+            
+            const startAngle = ((day - 1) / daysInMonth) * 360;
+            const endAngle = (day / daysInMonth) * 360;
+            
+            const r = 40, cx = 50, cy = 50;
+            const x1 = cx + r * Math.cos(Math.PI * (startAngle - 90) / 180);
+            const y1 = cy + r * Math.sin(Math.PI * (startAngle - 90) / 180);
+            const x2 = cx + r * Math.cos(Math.PI * (endAngle - 90) / 180);
+            const y2 = cy + r * Math.sin(Math.PI * (endAngle - 90) / 180);
+            const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+            
+            slices += `<path d="M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z" fill="${color}" stroke="#fff" stroke-width="0.5" />`;
+            
+            if (text) {
+                const midAngle = (startAngle + endAngle) / 2;
+                const tx = cx + (r * 0.6) * Math.cos(Math.PI * (midAngle - 90) / 180);
+                const ty = cy + (r * 0.6) * Math.sin(Math.PI * (midAngle - 90) / 180);
+                slices += `<text x="${tx}" y="${ty}" fill="#fff" font-size="6" text-anchor="middle" alignment-baseline="middle">${text}</text>`;
+            }
+        }
+        
+        const svg = `<svg width="80" height="80" viewBox="0 0 100 100">${slices}<circle cx="50" cy="50" r="15" fill="#fff"/><text x="50" y="50" font-size="18" font-weight="bold" fill="#333" text-anchor="middle" alignment-baseline="middle">${countPresent}</text></svg>`;
+        return { svg, countPresent };
+    }
+
+    // عرض العمال
+    function renderApp() {
+        const list = document.getElementById('workersList');
+        list.innerHTML = '';
+        
+        const dateStr = getDateString();
+        const todayAtt = db.attendance[dateStr] || {};
+        
+        if (db.workers.length === 0) {
+            list.innerHTML = '<div class="col-12 text-center text-muted py-5">لا يوجد عمال. أضف عاملاً جديداً للبدء.</div>';
+            return;
+        }
+        
+        db.workers.forEach(worker => {
+            const att = todayAtt[worker.id];
+            const status = att ? att.status : null;
+            
+            const { svg, countPresent } = generatePieChart(worker.id);
+            
+            const card = document.createElement('div');
+            card.className = 'col-md-6 col-lg-4';
+            card.innerHTML = `
+                <div class="worker-card p-3 d-flex align-items-center justify-content-between gap-2">
+                    <div class="d-flex align-items-center gap-3" style="flex: 1;">
+                        <div class="pie-chart-container">${svg}</div>
+                        <div>
+                            <button class="worker-name-btn" onclick="showSalary('${worker.id}')">${worker.name}</button>
+                            <div class="attendance-count">إجمالي الحضور: ${countPresent}</div>
+                        </div>
+                    </div>
+                    <div class="actions-container">
+                        <button class="btn-action ${status === 'present' ? 'active-present' : 'btn-present'}" onclick="markAttendance('${worker.id}', 'present')" title="حاضر">✔</button>
+                        <button class="btn-action ${status === 'friday_work' ? 'active-friday-work' : 'btn-friday-work'}" onclick="markAttendance('${worker.id}', 'friday_work')" title="نزل يوم الجمعة">🕌</button>
+                        <button class="btn-action ${status === 'friday_leave' ? 'active-friday-leave' : 'btn-friday-leave'}" onclick="markAttendance('${worker.id}', 'friday_leave')" title="إجازة جمعة">⏸</button>
+                        <button class="btn-action ${status === 'absent' ? 'active-absent' : 'btn-absent'}" onclick="markAttendance('${worker.id}', 'absent')" title="غياب">✖</button>
+                    </div>
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    // تبديل الشاشات
+    function switchView(viewId) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+        document.getElementById(viewId).classList.add('active-view');
+        document.getElementById('attendanceView').style.display = viewId === 'attendanceView' ? 'block' : 'none';
+    }
+
+    // حساب وعرض المرتب
+    function showSalary(workerId) {
+        const worker = db.workers.find(w => w.id === workerId);
+        const monthStr = getCurrentMonth();
+        const prevMonthStr = getPreviousMonth(monthStr);
+        
+        const currentMonthAtt = getMonthAttendance(workerId, monthStr);
+        const prevMonthAtt = getMonthAttendance(workerId, prevMonthStr);
+        
+        // المرتب الحالي = (أيام الحضور العادي + إجازات الجمع) × يومية الأساسي
+        const currentBase = (currentMonthAtt.present + currentMonthAtt.friday_leave) * db.settings.baseRate;
+        // بدل الشهر السابق = (أيام نزول الجمع في الشهر السابق) × يومية البدل
+        const prevReplacement = prevMonthAtt.friday_work * db.settings.replacementRate;
+        const totalSalary = currentBase + prevReplacement;
+        
+        const details = document.getElementById('salaryDetails');
+        details.innerHTML = `
+            <h3 class="mb-4 text-primary">${worker.name}</h3>
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card bg-light p-3">
+                        <h5>الشهر الحالي (${monthStr})</h5>
+                        <p>أيام الحضور العادي: ${currentMonthAtt.present} يوم</p>
+                        <p>إجازات الجمع: ${currentMonthAtt.friday_leave} يوم</p>
+                        <p>أيام نزول الجمع: ${currentMonthAtt.friday_work} يوم</p>
+                        <p>أيام الغياب: ${currentMonthAtt.absent} يوم</p>
+                        <hr>
+                        <h6 class="text-success">الأساسي المستحق: ${currentBase} جنيه</h6>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-light p-3">
+                        <h5>بدلات الشهر السابق (${prevMonthStr})</h5>
+                        <p>أيام نزول الجمع المؤجلة: ${prevMonthAtt.friday_work} يوم</p>
+                        <hr>
+                        <h6 class="text-success">إجمالي البدلات: ${prevReplacement} جنيه</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="alert alert-primary text-center">
+                <h4 class="mb-0">إجمالي المرتب المستحق صرف هذا الشهر: ${totalSalary} جنيه</h4>
+            </div>
+            <small class="text-muted d-block text-center">* ملاحظة: أيام نزول الجمع الخاصة بالشهر الحالي (${currentMonthAtt.friday_work} يوم) سيتم صرف قيمتها في الشهر القادم.</small>
+        `;
+        switchView('salaryView');
+    }
+
+    function getMonthAttendance(workerId, monthStr) {
+        const daysInMonth = getDaysInMonth(monthStr);
+        const [year, month] = monthStr.split('-').map(Number);
+        let counts = { present: 0, absent: 0, friday_work: 0, friday_leave: 0 };
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const att = db.attendance[dateStr]?.[workerId];
+            if (att) {
+                if (att.status === 'present') counts.present++;
+                if (att.status === 'absent') counts.absent++;
+                if (att.status === 'friday_work') counts.friday_work++;
+                if (att.status === 'friday_leave') counts.friday_leave++;
+            }
+        }
+        return counts;
+    }
+
+    // الإعدادات
+    function openSettings() {
+        document.getElementById('baseRateInput').value = db.settings.baseRate;
+        document.getElementById('replacementRateInput').value = db.settings.replacementRate;
+        new bootstrap.Modal(document.getElementById('settingsModal')).show();
+    }
+
+    function saveSettings() {
+        db.settings.baseRate = parseFloat(document.getElementById('baseRateInput').value) || 0;
+        db.settings.replacementRate = parseFloat(document.getElementById('replacementRateInput').value) || 0;
+        saveDB();
+        bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
+    }
+
+    // تهيئة التطبيق
+    function init() {
+        loadDB();
+        document.getElementById('currentDate').value = new Date().toISOString().split('T')[0];
+        renderApp();
+    }
+    init();
+</script>
+</body>
+</html>
