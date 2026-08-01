@@ -156,7 +156,7 @@
             background-color: var(--card-bg); border: 1px solid var(--border-color);
             color: var(--text-main); border-radius: 10px; box-shadow: none;
         }
-        .form-control::placeholder { color: var(--text-muted); }
+        .form-control::placeholder { color: #64748b; opacity: 0.8; }
         .form-control:focus { border-color: var(--accent-blue); }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.7; cursor: pointer; }
         .form-select option { background: var(--bg-dark); }
@@ -174,6 +174,20 @@
         .modal-header { border-bottom: 1px solid var(--border-color); }
         .modal-footer { border-top: 1px solid var(--border-color); }
         .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+
+        /* تنسيقات العناوين داخل الإعدادات */
+        .setting-label {
+            display: block;
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
+        }
+        .setting-label small {
+            color: var(--text-muted);
+            font-weight: 400;
+            font-size: 0.8rem;
+        }
 
         /* تنسيقات شاشة المرتب */
         .salary-box {
@@ -250,56 +264,56 @@
                 <h6 class="text-primary mb-3">إعدادات عامة (تطبق على جميع العمال)</h6>
                 <div class="row g-3 mb-4">
                     <div class="col-md-4">
-                        <label class="form-label text-muted small">يومية الحضور (جنيه)</label>
-                        <input type="number" id="baseRateInput" class="form-control">
+                        <label class="setting-label">يومية الحضور <small>(للشهر الحالي)</small></label>
+                        <input type="number" id="baseRateInput" class="form-control" placeholder="مثال: 165">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label text-muted small">يومية البدل (جنيه)</label>
-                        <input type="number" id="replacementRateInput" class="form-control">
+                        <label class="setting-label">يومية البدل <small>(للشهر السابق)</small></label>
+                        <input type="number" id="replacementRateInput" class="form-control" placeholder="مثال: 100">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label text-muted small">التأمينات (مبلغ ثابت)</label>
-                        <input type="number" id="insuranceInput" class="form-control">
+                        <label class="setting-label">التأمينات <small>(مبلغ ثابت يُخصم)</small></label>
+                        <input type="number" id="insuranceInput" class="form-control" placeholder="مثال: 500">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label text-muted small">الضرائب (% نسبة)</label>
+                        <label class="setting-label">الضرائب <small>(نسبة % تُخصم)</small></label>
                         <input type="number" id="taxInput" class="form-control" placeholder="مثال: 5">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label text-muted small">الحافز الإضافي العام (جنيه)</label>
-                        <input type="number" id="globalIncentiveInput" class="form-control">
+                        <label class="setting-label">الحافز العام <small>(يُضاف للجميع)</small></label>
+                        <input type="number" id="globalIncentiveInput" class="form-control" placeholder="مثال: 200">
                     </div>
                 </div>
 
                 <hr style="border-color: var(--border-color);">
 
                 <!-- إعدادات فردية -->
-                <h6 class="text-success mb-3">إعدادات فردية (لكل عامل)</h6>
+                <h6 class="text-success mb-3">إعدادات فردية (لكل عامل على حدة)</h6>
                 <div class="mb-3">
-                    <label class="form-label text-muted small">اختر العامل</label>
+                    <label class="setting-label">اختر العامل لتعديل بياناته</label>
                     <select class="form-select" id="workerSelectSettings" onchange="loadWorkerSettings()">
-                        <option value="">-- اختر عامل لتعديل بياناته --</option>
+                        <option value="">-- اختر عامل من القائمة --</option>
                     </select>
                 </div>
 
                 <div id="workerSettingsFields" style="display: none;">
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label class="form-label text-muted small">بدل مواصلات (جنيه)</label>
-                            <input type="number" id="transportInput" class="form-control">
+                            <label class="setting-label">بدل مواصلات <small>(يُضاف للعامل)</small></label>
+                            <input type="number" id="transportInput" class="form-control" placeholder="مثال: 300">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label text-muted small">حافز خاص (جنيه)</label>
-                            <input type="number" id="specialIncentiveInput" class="form-control">
+                            <label class="setting-label">حافز خاص / مكافأة <small>(يُضاف للعامل)</small></label>
+                            <input type="number" id="specialIncentiveInput" class="form-control" placeholder="مثال: 150">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label text-muted small">خصم (جنيه)</label>
-                            <input type="number" id="deductionInput" class="form-control">
+                            <label class="setting-label">خصم / غرامة <small>(يُخصم من العامل)</small></label>
+                            <input type="number" id="deductionInput" class="form-control" placeholder="مثال: 50">
                         </div>
                         <div class="col-12 mt-3">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="applyGlobalIncentiveCheck" style="background-color: var(--accent-green); border-color: var(--accent-green);">
-                                <label class="form-check-label text-muted" for="applyGlobalIncentiveCheck">تطبيق الحافز الإضافي العام على هذا العامل</label>
+                                <label class="form-check-label text-muted" for="applyGlobalIncentiveCheck">صرف الحافز الإضافي العام لهذا العامل</label>
                             </div>
                         </div>
                     </div>
@@ -330,10 +344,10 @@
     };
 
     function loadDB() {
-        const saved = localStorage.getItem('workers_db_v4');
+        const saved = localStorage.getItem('workers_db_v5'); // تغيير النسخة لحفظ التحديثات
         if (saved) db = JSON.parse(saved);
     }
-    function saveDB() { localStorage.setItem('workers_db_v4', JSON.stringify(db)); }
+    function saveDB() { localStorage.setItem('workers_db_v5', JSON.stringify(db)); }
 
     function getDateString() { return document.getElementById('currentDate').value; }
     function getCurrentMonth() {
@@ -353,7 +367,6 @@
     function addWorker() {
         const name = document.getElementById('workerNameInput').value.trim();
         if (!name) return;
-        // تهيئة العامل بالقيم الافتراضية الفردية
         db.workers.push({ 
             id: Date.now().toString(), 
             name: name,
@@ -538,7 +551,6 @@
         return counts;
     }
 
-    // حساب وعرض المرتب بالمعادلة الجديدة
     function showSalary(workerId) {
         const worker = db.workers.find(w => w.id === workerId);
         const monthStr = getCurrentMonth();
@@ -547,27 +559,18 @@
         const currentAtt = getMonthAttendance(workerId, monthStr);
         const prevAtt = getMonthAttendance(workerId, prevMonthStr);
         
-        // 1. حساب الأساسي (حضور الشهر الحالي * 165)
         const currentBase = currentAtt.total_attendance * db.settings.baseRate;
-        // 2. حساب بدل الشهر السابق (حضور الشهر السابق * 100)
         const prevReplacement = prevAtt.total_attendance * db.settings.replacementRate;
         
-        // 3. الإضافات
         const transport = worker.transport || 0;
         const specialIncentive = worker.specialIncentive || 0;
         const globalIncentive = worker.applyGlobalIncentive ? (db.settings.globalIncentive || 0) : 0;
         
-        // 4. الخصومات الثابتة
         const insurance = db.settings.insurance || 0;
         const deduction = worker.deduction || 0;
         
-        // 5. صافي قبل الضرائب
         const netBeforeTax = currentBase + prevReplacement + transport + specialIncentive + globalIncentive - insurance - deduction;
-        
-        // 6. الضرائب (نسبة من الصافي)
         const tax = netBeforeTax * ((db.settings.taxRate || 0) / 100);
-        
-        // 7. إجمالي الصافي النهائي
         const totalSalary = netBeforeTax - tax;
         
         const details = document.getElementById('salaryDetails');
@@ -619,7 +622,6 @@
         switchView('salaryView');
     }
 
-    // الإعدادات
     function openSettings() {
         document.getElementById('baseRateInput').value = db.settings.baseRate;
         document.getElementById('replacementRateInput').value = db.settings.replacementRate;
@@ -628,7 +630,7 @@
         document.getElementById('globalIncentiveInput').value = db.settings.globalIncentive;
         
         const select = document.getElementById('workerSelectSettings');
-        select.innerHTML = '<option value="">-- اختر عامل لتعديل بياناته --</option>';
+        select.innerHTML = '<option value="">-- اختر عامل من القائمة --</option>';
         db.workers.forEach(w => {
             select.innerHTML += `<option value="${w.id}">${w.name}</option>`;
         });

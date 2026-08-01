@@ -1,4 +1,4 @@
-const CACHE_NAME = 'workers-app-cache-v2'; // تم تغيير رقم الإصدار
+const CACHE_NAME = 'workers-app-cache-v3'; // تم تغيير رقم الإصدار
 const urlsToCache = [
   './',
   './index.html',
