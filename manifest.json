@@ -1,0 +1,25 @@
+{
+  "name": "نظام إدارة العمال",
+  "short_name": "العمال",
+  "description": "تطبيق تسجيل حضور وانصراف وحساب مرتبات العمال",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f0f2f5",
+  "theme_color": "#0d6efd",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135768.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135768.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
