@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>نظام إدارة العمال</title>
     
-    <!-- أكواد تشغيل التطبيق بدون إنترنت (PWA) -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     
-    <!-- التصميم والخطوط -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
@@ -24,11 +22,10 @@
             --accent-green: #10b981;
             --accent-red: #ef4444;
             --accent-gray: #64748b;
+            --accent-yellow: #f59e0b;
         }
 
-        * {
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: 'Cairo', sans-serif;
@@ -38,17 +35,12 @@
             overflow-x: hidden;
         }
 
-        /* تأثير الزجاج للهيدر */
         .app-header {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            position: sticky; top: 0; z-index: 1000;
             background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border-color);
-            padding: 1rem 0;
-            margin-bottom: 2rem;
+            padding: 1rem 0; margin-bottom: 2rem;
         }
 
         .app-title {
@@ -59,25 +51,20 @@
             margin: 0;
         }
 
-        /* تصميم البطاقات */
         .worker-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 16px;
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
+            padding: 1.2rem;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             animation: slideIn 0.4s ease-out forwards;
             opacity: 0;
+            height: 100%;
         }
 
         .worker-card:hover {
             background: var(--card-hover);
             border-color: var(--accent-blue);
-            transform: translateY(-2px);
             box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.2);
         }
 
@@ -86,146 +73,137 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* الدائرة */
-        .pie-chart-container {
-            position: relative;
-            width: 70px;
-            height: 70px;
-            flex-shrink: 0;
+        .card-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
         }
 
         .worker-name-btn {
-            background: none;
-            border: none;
-            font-weight: 700;
-            color: var(--text-main);
-            text-align: right;
-            cursor: pointer;
-            padding: 0;
-            font-size: 1.1rem;
+            background: none; border: none;
+            font-weight: 700; color: var(--text-main);
+            cursor: pointer; padding: 0;
+            font-size: 1.2rem;
+            white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis;
+            max-width: 70%;
             transition: color 0.2s;
         }
 
-        .worker-name-btn:hover {
-            color: var(--accent-blue);
-        }
+        .worker-name-btn:hover { color: var(--accent-blue); }
 
-        .attendance-count {
-            font-size: 0.85rem;
+        .header-actions { display: flex; gap: 0.5rem; }
+
+        .icon-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
             color: var(--text-muted);
-            margin-top: 4px;
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .icon-btn:hover { border-color: var(--text-muted); color: var(--text-main); }
+        .icon-btn.delete-btn:hover { border-color: var(--accent-red); color: var(--accent-red); }
+        .icon-btn svg { width: 16px; height: 16px; }
+
+        .card-body-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        /* الأزرار */
-        .actions-container {
-            display: flex;
-            gap: 6px;
+        .pie-chart-container {
+            position: relative; width: 90px; height: 90px; flex-shrink: 0;
         }
+
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
+            flex-grow: 1;
+        }
+
+        .actions-container { display: flex; gap: 8px; }
 
         .btn-action {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
             border: 1px solid var(--border-color);
-            background: transparent;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.2s ease;
+            background: transparent; color: var(--text-muted);
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        .btn-action:hover { border-color: currentColor; transform: scale(1.05); }
+        .btn-action svg { width: 18px; height: 18px; }
+
+        .active-present { background: var(--accent-green); border-color: var(--accent-green); color: #fff; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+        .active-friday-work { background: var(--accent-blue); border-color: var(--accent-blue); color: #fff; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+        .active-friday-leave { background: var(--accent-gray); border-color: var(--accent-gray); color: #fff; box-shadow: 0 0 15px rgba(100, 116, 139, 0.4); }
+        .active-absent { background: var(--accent-red); border-color: var(--accent-red); color: #fff; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+
+        .attendance-count {
+            font-size: 0.9rem; color: var(--text-muted); font-weight: 600;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 4px 12px; border-radius: 20px;
         }
 
-        .btn-action:hover {
-            border-color: currentColor;
-            transform: scale(1.1);
+        .form-control, .form-control:focus, .form-select {
+            background-color: var(--card-bg); border: 1px solid var(--border-color);
+            color: var(--text-main); border-radius: 10px; box-shadow: none;
         }
-
-        .btn-action svg {
-            width: 16px;
-            height: 16px;
-        }
-
-        /* حالات النشاط (Active States) */
-        .active-present {
-            background: var(--accent-green);
-            border-color: var(--accent-green);
-            color: #fff;
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
-        }
-        .active-friday-work {
-            background: var(--accent-blue);
-            border-color: var(--accent-blue);
-            color: #fff;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
-        }
-        .active-friday-leave {
-            background: var(--accent-gray);
-            border-color: var(--accent-gray);
-            color: #fff;
-            box-shadow: 0 0 15px rgba(100, 116, 139, 0.4);
-        }
-        .active-absent {
-            background: var(--accent-red);
-            border-color: var(--accent-red);
-            color: #fff;
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
-        }
-
-        /* المدخلات (Inputs) */
-        .form-control, .form-control:focus {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            border-radius: 10px;
-            box-shadow: none;
-        }
-        
         .form-control::placeholder { color: var(--text-muted); }
         .form-control:focus { border-color: var(--accent-blue); }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.7; cursor: pointer; }
+        .form-select option { background: var(--bg-dark); }
 
-        .btn-primary {
-            background: var(--accent-blue);
-            border: none;
-            border-radius: 10px;
-            padding: 0.5rem 1.5rem;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+        .btn-primary { background: var(--accent-blue); border: none; border-radius: 10px; font-weight: 600; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-outline-secondary { border-color: var(--border-color); color: var(--text-muted); border-radius: 10px; }
+        .btn-outline-secondary:hover { background: var(--card-bg); border-color: var(--text-muted); color: var(--text-main); }
 
-        .btn-outline-secondary {
-            border-color: var(--border-color);
-            color: var(--text-muted);
-            border-radius: 10px;
-        }
-        .btn-outline-secondary:hover {
-            background: var(--card-bg);
-            border-color: var(--text-muted);
-            color: var(--text-main);
-        }
-
-        /* الشاشات */
         .view { display: none; }
         .active-view { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* النوافذ المنبثقة (Modals) */
-        .modal-content {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            border-radius: 16px;
-        }
+        .modal-content { background-color: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 16px; }
         .modal-header { border-bottom: 1px solid var(--border-color); }
         .modal-footer { border-top: 1px solid var(--border-color); }
         .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+
+        /* تنسيقات شاشة المرتب */
+        .salary-box {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .salary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+        }
+        .text-success { color: var(--accent-green) !important; }
+        .text-danger { color: var(--accent-red) !important; }
+        .text-warning { color: var(--accent-yellow) !important; }
+        
+        .total-salary-box {
+            background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
 
-<!-- الهيدر -->
 <div class="app-header">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -233,7 +211,7 @@
             <div class="d-flex gap-2">
                 <input type="date" id="currentDate" class="form-control" onchange="renderApp()">
                 <button class="btn btn-outline-secondary" onclick="openSettings()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                 </button>
             </div>
         </div>
@@ -241,42 +219,90 @@
 </div>
 
 <div class="container pb-5">
-    <!-- شاشة الحضور -->
     <div id="attendanceView" class="active-view">
         <div class="card mb-4" style="background: var(--card-bg); border: 1px solid var(--border-color);">
             <div class="card-body d-flex gap-2">
                 <input type="text" id="workerNameInput" class="form-control" placeholder="إضافة عامل جديد...">
                 <button class="btn btn-primary" onclick="addWorker()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 </button>
             </div>
         </div>
         <div id="workersList" class="row g-3"></div>
     </div>
 
-    <!-- شاشة تفاصيل المرتب -->
     <div id="salaryView" class="view">
-        <button class="btn btn-outline-secondary mb-4" onclick="switchView('attendanceView')">← رجوع</button>
-        <div id="salaryDetails" class="p-4" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px;"></div>
+        <button class="btn btn-outline-secondary mb-4" onclick="switchView('attendanceView')">← رجوع للقائمة</button>
+        <div id="salaryDetails" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 2rem;"></div>
     </div>
 </div>
 
-<!-- نافذة الإعدادات -->
+<!-- نافذة الإعدادات المتقدمة -->
 <div class="modal fade" id="settingsModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">إعدادات المرتب</h5>
+                <h5 class="modal-title">الإعدادات المالية</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label text-muted">يومية العمل العادي / إجازة الجمعة (جنيه)</label>
-                    <input type="number" id="baseRateInput" class="form-control">
+                <!-- إعدادات عامة -->
+                <h6 class="text-primary mb-3">إعدادات عامة (تطبق على جميع العمال)</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small">يومية الحضور (جنيه)</label>
+                        <input type="number" id="baseRateInput" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small">يومية البدل (جنيه)</label>
+                        <input type="number" id="replacementRateInput" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small">التأمينات (مبلغ ثابت)</label>
+                        <input type="number" id="insuranceInput" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small">الضرائب (% نسبة)</label>
+                        <input type="number" id="taxInput" class="form-control" placeholder="مثال: 5">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small">الحافز الإضافي العام (جنيه)</label>
+                        <input type="number" id="globalIncentiveInput" class="form-control">
+                    </div>
                 </div>
+
+                <hr style="border-color: var(--border-color);">
+
+                <!-- إعدادات فردية -->
+                <h6 class="text-success mb-3">إعدادات فردية (لكل عامل)</h6>
                 <div class="mb-3">
-                    <label class="form-label text-muted">يومية نزول يوم الجمعة (بدل - جنيه)</label>
-                    <input type="number" id="replacementRateInput" class="form-control">
+                    <label class="form-label text-muted small">اختر العامل</label>
+                    <select class="form-select" id="workerSelectSettings" onchange="loadWorkerSettings()">
+                        <option value="">-- اختر عامل لتعديل بياناته --</option>
+                    </select>
+                </div>
+
+                <div id="workerSettingsFields" style="display: none;">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small">بدل مواصلات (جنيه)</label>
+                            <input type="number" id="transportInput" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small">حافز خاص (جنيه)</label>
+                            <input type="number" id="specialIncentiveInput" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small">خصم (جنيه)</label>
+                            <input type="number" id="deductionInput" class="form-control">
+                        </div>
+                        <div class="col-12 mt-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="applyGlobalIncentiveCheck" style="background-color: var(--accent-green); border-color: var(--accent-green);">
+                                <label class="form-check-label text-muted" for="applyGlobalIncentiveCheck">تطبيق الحافز الإضافي العام على هذا العامل</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -288,28 +314,26 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // الأيقونات الـ SVG الاحترافية
     const icons = {
         present: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
-        friday_work: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>', // علامة + (عمل إضافي/بدل)
-        friday_leave: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>', // علامة إيقاف (إجازة)
-        absent: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' // علامة X (غياب)
+        friday_work: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
+        friday_leave: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>',
+        absent: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+        edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>',
+        delete: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>'
     };
 
-    // قاعدة البيانات
-    let db = {
-        workers: [],
+    let db = { 
+        workers: [], 
         attendance: {}, 
-        settings: { baseRate: 165, replacementRate: 100 }
+        settings: { baseRate: 165, replacementRate: 100, insurance: 0, taxRate: 0, globalIncentive: 0 } 
     };
 
     function loadDB() {
-        const saved = localStorage.getItem('workers_db_v2');
+        const saved = localStorage.getItem('workers_db_v4');
         if (saved) db = JSON.parse(saved);
     }
-    function saveDB() {
-        localStorage.setItem('workers_db_v2', JSON.stringify(db));
-    }
+    function saveDB() { localStorage.setItem('workers_db_v4', JSON.stringify(db)); }
 
     function getDateString() { return document.getElementById('currentDate').value; }
     function getCurrentMonth() {
@@ -329,9 +353,39 @@
     function addWorker() {
         const name = document.getElementById('workerNameInput').value.trim();
         if (!name) return;
-        db.workers.push({ id: Date.now().toString(), name: name });
+        // تهيئة العامل بالقيم الافتراضية الفردية
+        db.workers.push({ 
+            id: Date.now().toString(), 
+            name: name,
+            transport: 0,
+            specialIncentive: 0,
+            deduction: 0,
+            applyGlobalIncentive: true
+        });
         db.workers.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
         document.getElementById('workerNameInput').value = '';
+        saveDB();
+        renderApp();
+    }
+
+    function editWorker(id) {
+        const worker = db.workers.find(w => w.id === id);
+        if (!worker) return;
+        const newName = prompt("تعديل اسم العامل:", worker.name);
+        if (newName && newName.trim() !== "") {
+            worker.name = newName.trim();
+            db.workers.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+            saveDB();
+            renderApp();
+        }
+    }
+
+    function deleteWorker(id) {
+        if (!confirm("هل أنت متأكد من حذف هذا العامل وكل سجلاته؟")) return;
+        db.workers = db.workers.filter(w => w.id !== id);
+        Object.keys(db.attendance).forEach(date => {
+            if (db.attendance[date][id]) delete db.attendance[date][id];
+        });
         saveDB();
         renderApp();
     }
@@ -357,7 +411,6 @@
         renderApp();
     }
 
-    // رسم الدائرة
     function generatePieChart(workerId) {
         const monthStr = getCurrentMonth();
         const daysInMonth = getDaysInMonth(monthStr);
@@ -370,7 +423,7 @@
             const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const att = db.attendance[dateStr]?.[workerId];
             
-            let color = '#334155'; // لون الأيام غير المسجلة (رمادي داكن)
+            let color = '#334155';
             let text = '';
             
             if (att) {
@@ -395,18 +448,17 @@
                 const midAngle = (startAngle + endAngle) / 2;
                 const tx = cx + (r * 0.65) * Math.cos(Math.PI * (midAngle - 90) / 180);
                 const ty = cy + (r * 0.65) * Math.sin(Math.PI * (midAngle - 90) / 180);
-                slices += `<text x="${tx}" y="${ty}" fill="#fff" font-size="8" font-weight="bold" text-anchor="middle" alignment-baseline="middle">${text}</text>`;
+                slices += `<text x="${tx}" y="${ty}" fill="#fff" font-size="9" font-weight="bold" text-anchor="middle" alignment-baseline="middle">${text}</text>`;
             }
         }
         
-        const svg = `<svg width="70" height="70" viewBox="0 0 100 100">${slices}<circle cx="50" cy="50" r="18" fill="#1e293b"/><text x="50" y="52" font-size="16" font-weight="900" fill="#f1f5f9" text-anchor="middle" alignment-baseline="middle">${countPresent}</text></svg>`;
-        return { svg, countPresent };
+        const svg = `<svg width="90" height="90" viewBox="0 0 100 100">${slices}<circle cx="50" cy="50" r="18" fill="#1e293b"/><text x="50" y="52" font-size="16" font-weight="900" fill="#f1f5f9" text-anchor="middle" alignment-baseline="middle">${countPresent}</text></svg>`;
+        return svg;
     }
 
     function renderApp() {
         const list = document.getElementById('workersList');
         list.innerHTML = '';
-        
         const dateStr = getDateString();
         const todayAtt = db.attendance[dateStr] || {};
         
@@ -418,30 +470,49 @@
         db.workers.forEach((worker, index) => {
             const att = todayAtt[worker.id];
             const status = att ? att.status : null;
-            const { svg, countPresent } = generatePieChart(worker.id);
+            const svg = generatePieChart(worker.id);
             
             const card = document.createElement('div');
             card.className = 'col-md-6 col-lg-4';
-            card.style.animationDelay = `${index * 0.05}s`; // انيميشن دخول تدريجي
+            card.style.animationDelay = `${index * 0.05}s`;
             card.innerHTML = `
                 <div class="worker-card">
-                    <div class="d-flex align-items-center gap-3" style="flex: 1;">
-                        <div class="pie-chart-container">${svg}</div>
-                        <div>
-                            <button class="worker-name-btn" onclick="showSalary('${worker.id}')">${worker.name}</button>
-                            <div class="attendance-count">إجمالي الحضور: ${countPresent}</div>
+                    <div class="card-header-custom">
+                        <button class="worker-name-btn" onclick="showSalary('${worker.id}')">${worker.name}</button>
+                        <div class="header-actions">
+                            <button class="icon-btn" onclick="editWorker('${worker.id}')" title="تعديل الاسم">${icons.edit}</button>
+                            <button class="icon-btn delete-btn" onclick="deleteWorker('${worker.id}')" title="حذف العامل">${icons.delete}</button>
                         </div>
                     </div>
-                    <div class="actions-container">
-                        <button class="btn-action ${status === 'present' ? 'active-present' : ''}" onclick="markAttendance('${worker.id}', 'present')" title="حاضر">${icons.present}</button>
-                        <button class="btn-action ${status === 'friday_work' ? 'active-friday-work' : ''}" onclick="markAttendance('${worker.id}', 'friday_work')" title="نزل يوم الجمعة">${icons.friday_work}</button>
-                        <button class="btn-action ${status === 'friday_leave' ? 'active-friday-leave' : ''}" onclick="markAttendance('${worker.id}', 'friday_leave')" title="إجازة جمعة">${icons.friday_leave}</button>
-                        <button class="btn-action ${status === 'absent' ? 'active-absent' : ''}" onclick="markAttendance('${worker.id}', 'absent')" title="غياب">${icons.absent}</button>
+                    <div class="card-body-custom">
+                        <div class="pie-chart-container">${svg}</div>
+                        <div class="left-section">
+                            <div class="actions-container">
+                                <button class="btn-action ${status === 'present' ? 'active-present' : ''}" onclick="markAttendance('${worker.id}', 'present')" title="حاضر">${icons.present}</button>
+                                <button class="btn-action ${status === 'friday_work' ? 'active-friday-work' : ''}" onclick="markAttendance('${worker.id}', 'friday_work')" title="نزل يوم الجمعة">${icons.friday_work}</button>
+                                <button class="btn-action ${status === 'friday_leave' ? 'active-friday-leave' : ''}" onclick="markAttendance('${worker.id}', 'friday_leave')" title="إجازة جمعة">${icons.friday_leave}</button>
+                                <button class="btn-action ${status === 'absent' ? 'active-absent' : ''}" onclick="markAttendance('${worker.id}', 'absent')" title="غياب">${icons.absent}</button>
+                            </div>
+                            <div class="attendance-count">إجمالي الحضور: ${getMonthlyCount(worker.id)} يوم</div>
+                        </div>
                     </div>
                 </div>
             `;
             list.appendChild(card);
         });
+    }
+
+    function getMonthlyCount(workerId) {
+        const monthStr = getCurrentMonth();
+        const daysInMonth = getDaysInMonth(monthStr);
+        const [year, month] = monthStr.split('-').map(Number);
+        let count = 0;
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const att = db.attendance[dateStr]?.[workerId];
+            if (att && att.status !== 'absent') count++;
+        }
+        return count;
     }
 
     function switchView(viewId) {
@@ -450,77 +521,155 @@
         document.getElementById('attendanceView').style.display = viewId === 'attendanceView' ? 'block' : 'none';
     }
 
-    function showSalary(workerId) {
-        const worker = db.workers.find(w => w.id === workerId);
-        const monthStr = getCurrentMonth();
-        const prevMonthStr = getPreviousMonth(monthStr);
-        
-        const currentMonthAtt = getMonthAttendance(workerId, monthStr);
-        const prevMonthAtt = getMonthAttendance(workerId, prevMonthStr);
-        
-        const currentBase = (currentMonthAtt.present + currentMonthAtt.friday_leave) * db.settings.baseRate;
-        const prevReplacement = prevMonthAtt.friday_work * db.settings.replacementRate;
-        const totalSalary = currentBase + prevReplacement;
-        
-        const details = document.getElementById('salaryDetails');
-        details.innerHTML = `
-            <h3 class="mb-4" style="color: var(--accent-blue);">${worker.name}</h3>
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <div style="background: var(--bg-dark); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color);">
-                        <h5 style="color: var(--text-muted); margin-bottom: 1rem;">الشهر الحالي (${monthStr})</h5>
-                        <p>أيام الحضور العادي: <b>${currentMonthAtt.present} يوم</b></p>
-                        <p>إجازات الجمع: <b>${currentMonthAtt.friday_leave} يوم</b></p>
-                        <p>أيام نزول الجمع: <b>${currentMonthAtt.friday_work} يوم</b></p>
-                        <p>أيام الغياب: <b style="color: var(--accent-red);">${currentMonthAtt.absent} يوم</b></p>
-                        <hr style="border-color: var(--border-color);">
-                        <h6 style="color: var(--accent-green);">الأساسي المستحق: ${currentBase} جنيه</h6>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div style="background: var(--bg-dark); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color);">
-                        <h5 style="color: var(--text-muted); margin-bottom: 1rem;">بدلات الشهر السابق (${prevMonthStr})</h5>
-                        <p>أيام نزول الجمع المؤجلة: <b>${prevMonthAtt.friday_work} يوم</b></p>
-                        <hr style="border-color: var(--border-color);">
-                        <h6 style="color: var(--accent-green);">إجمالي البدلات: ${prevReplacement} جنيه</h6>
-                    </div>
-                </div>
-            </div>
-            <div style="background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%); padding: 1.5rem; border-radius: 12px; text-align: center; color: #fff;">
-                <h4 class="mb-0" style="font-weight: 900;">إجمالي المرتب: ${totalSalary} جنيه</h4>
-            </div>
-            <small class="text-muted d-block text-center mt-3">* أيام نزول الجمع لهذا الشهر (${currentMonthAtt.friday_work} يوم) ستُصرف في الشهر القادم.</small>
-        `;
-        switchView('salaryView');
-    }
-
     function getMonthAttendance(workerId, monthStr) {
         const daysInMonth = getDaysInMonth(monthStr);
         const [year, month] = monthStr.split('-').map(Number);
-        let counts = { present: 0, absent: 0, friday_work: 0, friday_leave: 0 };
-        
+        let counts = { present: 0, absent: 0, friday_work: 0, friday_leave: 0, total_attendance: 0 };
         for (let day = 1; day <= daysInMonth; day++) {
             const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const att = db.attendance[dateStr]?.[workerId];
             if (att) {
-                if (att.status === 'present') counts.present++;
+                if (att.status === 'present') { counts.present++; counts.total_attendance++; }
                 if (att.status === 'absent') counts.absent++;
-                if (att.status === 'friday_work') counts.friday_work++;
-                if (att.status === 'friday_leave') counts.friday_leave++;
+                if (att.status === 'friday_work') { counts.friday_work++; counts.total_attendance++; }
+                if (att.status === 'friday_leave') { counts.friday_leave++; counts.total_attendance++; }
             }
         }
         return counts;
     }
 
+    // حساب وعرض المرتب بالمعادلة الجديدة
+    function showSalary(workerId) {
+        const worker = db.workers.find(w => w.id === workerId);
+        const monthStr = getCurrentMonth();
+        const prevMonthStr = getPreviousMonth(monthStr);
+        
+        const currentAtt = getMonthAttendance(workerId, monthStr);
+        const prevAtt = getMonthAttendance(workerId, prevMonthStr);
+        
+        // 1. حساب الأساسي (حضور الشهر الحالي * 165)
+        const currentBase = currentAtt.total_attendance * db.settings.baseRate;
+        // 2. حساب بدل الشهر السابق (حضور الشهر السابق * 100)
+        const prevReplacement = prevAtt.total_attendance * db.settings.replacementRate;
+        
+        // 3. الإضافات
+        const transport = worker.transport || 0;
+        const specialIncentive = worker.specialIncentive || 0;
+        const globalIncentive = worker.applyGlobalIncentive ? (db.settings.globalIncentive || 0) : 0;
+        
+        // 4. الخصومات الثابتة
+        const insurance = db.settings.insurance || 0;
+        const deduction = worker.deduction || 0;
+        
+        // 5. صافي قبل الضرائب
+        const netBeforeTax = currentBase + prevReplacement + transport + specialIncentive + globalIncentive - insurance - deduction;
+        
+        // 6. الضرائب (نسبة من الصافي)
+        const tax = netBeforeTax * ((db.settings.taxRate || 0) / 100);
+        
+        // 7. إجمالي الصافي النهائي
+        const totalSalary = netBeforeTax - tax;
+        
+        const details = document.getElementById('salaryDetails');
+        details.innerHTML = `
+            <h3 class="mb-4" style="color: var(--accent-blue);">${worker.name}</h3>
+            <div class="salary-box">
+                <div class="salary-row text-success">
+                    <span>أساسي (حضور الشهر الحالي ${currentAtt.total_attendance} يوم × ${db.settings.baseRate}):</span>
+                    <span>${currentBase} جنيه</span>
+                </div>
+                <div class="salary-row text-success">
+                    <span>بدل (حضور الشهر السابق ${prevAtt.total_attendance} يوم × ${db.settings.replacementRate}):</span>
+                    <span>${prevReplacement} جنيه</span>
+                </div>
+                <div class="salary-row text-warning">
+                    <span>بدل مواصلات:</span>
+                    <span>${transport} جنيه</span>
+                </div>
+                <div class="salary-row text-warning">
+                    <span>حافز خاص:</span>
+                    <span>${specialIncentive} جنيه</span>
+                </div>
+                ${worker.applyGlobalIncentive ? `
+                <div class="salary-row text-warning">
+                    <span>حافز إضافي عام:</span>
+                    <span>${globalIncentive} جنيه</span>
+                </div>` : ''}
+            </div>
+
+            <div class="salary-box">
+                <div class="salary-row text-danger">
+                    <span>تأمينات:</span>
+                    <span>- ${insurance} جنيه</span>
+                </div>
+                <div class="salary-row text-danger">
+                    <span>خصم:</span>
+                    <span>- ${deduction} جنيه</span>
+                </div>
+                <div class="salary-row text-danger">
+                    <span>ضرائب (${db.settings.taxRate || 0}%):</span>
+                    <span>- ${tax.toFixed(2)} جنيه</span>
+                </div>
+            </div>
+
+            <div class="total-salary-box">
+                <h4 class="mb-0" style="font-weight: 900;">إجمالي الصافي: ${totalSalary.toFixed(2)} جنيه</h4>
+            </div>
+        `;
+        switchView('salaryView');
+    }
+
+    // الإعدادات
     function openSettings() {
         document.getElementById('baseRateInput').value = db.settings.baseRate;
         document.getElementById('replacementRateInput').value = db.settings.replacementRate;
+        document.getElementById('insuranceInput').value = db.settings.insurance;
+        document.getElementById('taxInput').value = db.settings.taxRate;
+        document.getElementById('globalIncentiveInput').value = db.settings.globalIncentive;
+        
+        const select = document.getElementById('workerSelectSettings');
+        select.innerHTML = '<option value="">-- اختر عامل لتعديل بياناته --</option>';
+        db.workers.forEach(w => {
+            select.innerHTML += `<option value="${w.id}">${w.name}</option>`;
+        });
+        
+        document.getElementById('workerSettingsFields').style.display = 'none';
         new bootstrap.Modal(document.getElementById('settingsModal')).show();
+    }
+
+    function loadWorkerSettings() {
+        const id = document.getElementById('workerSelectSettings').value;
+        const fields = document.getElementById('workerSettingsFields');
+        if (!id) { fields.style.display = 'none'; return; }
+        
+        const worker = db.workers.find(w => w.id === id);
+        if (!worker) return;
+        
+        fields.style.display = 'block';
+        document.getElementById('transportInput').value = worker.transport || 0;
+        document.getElementById('specialIncentiveInput').value = worker.specialIncentive || 0;
+        document.getElementById('deductionInput').value = worker.deduction || 0;
+        document.getElementById('applyGlobalIncentiveCheck').checked = worker.applyGlobalIncentive !== false;
     }
 
     function saveSettings() {
         db.settings.baseRate = parseFloat(document.getElementById('baseRateInput').value) || 0;
         db.settings.replacementRate = parseFloat(document.getElementById('replacementRateInput').value) || 0;
+        db.settings.insurance = parseFloat(document.getElementById('insuranceInput').value) || 0;
+        db.settings.taxRate = parseFloat(document.getElementById('taxInput').value) || 0;
+        db.settings.globalIncentive = parseFloat(document.getElementById('globalIncentiveInput').value) || 0;
+        
+        const selectedWorkerId = document.getElementById('workerSelectSettings').value;
+        if (selectedWorkerId) {
+            const worker = db.workers.find(w => w.id === selectedWorkerId);
+            if (worker) {
+                worker.transport = parseFloat(document.getElementById('transportInput').value) || 0;
+                worker.specialIncentive = parseFloat(document.getElementById('specialIncentiveInput').value) || 0;
+                worker.deduction = parseFloat(document.getElementById('deductionInput').value) || 0;
+                worker.applyGlobalIncentive = document.getElementById('applyGlobalIncentiveCheck').checked;
+            }
+        }
+        
         saveDB();
         bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
     }
@@ -533,7 +682,6 @@
     init();
 </script>
 
-<!-- كود تشغيل التطبيق بدون إنترنت (Service Worker) -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
